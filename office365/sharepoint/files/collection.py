@@ -60,7 +60,7 @@ class FileCollection(EntityCollection[File]):
         return self.add(file_name, None, True).after_execute(_upload_session)
 
     def create_upload_session(
-        self, file, chunk_size, chunk_uploaded=None, file_name=None, **kwargs
+        self, file, chunk_size, chunk_uploaded=None, file_name=None, file_size=None, **kwargs
     ):
         # type: (IO|str, int, Callable[[int, ...], None], str, ...) -> File
         """Upload a file as multiple chunks
@@ -68,6 +68,7 @@ class FileCollection(EntityCollection[File]):
         :param int chunk_size: upload chunk size (in bytes)
         :param (long)->None or None chunk_uploaded: uploaded event
         :param str file_name: custom file name
+        :param int file_size: externally-calculated file size
         :param kwargs: arguments to pass to chunk_uploaded function
         """
 
@@ -76,7 +77,7 @@ class FileCollection(EntityCollection[File]):
             file = open(file, "rb")
             auto_close = True
 
-        file_size = os.fstat(file.fileno()).st_size
+        file_size = file_size if file_size else os.fstat(file.fileno()).st_size
         file_name = file_name if file_name else os.path.basename(file.name)
         upload_id = str(uuid.uuid4())
 
